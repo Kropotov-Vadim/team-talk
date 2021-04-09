@@ -1,0 +1,68 @@
+
+<script src="/socket.io/socket.io.js"></script>
+
+<button id="start">run</button>
+
+<div id="video-chat-container" class="video-position" >
+    <video id="local-video" autoplay="autoplay" muted="muted"></video>
+    <video id="remote-video" autoplay="autoplay"></video>
+  </div>
+
+
+
+  <script>
+    const socket = io("http://localhost:3000");
+    socket.connect();
+    const localVideoComponent = document.getElementById('local-video')
+    const remoteVideoComponent = document.getElementById('remote-video')
+    const connectButton = document.getElementById('start')
+    const mediaConstraints = {
+      audio: true,
+      video: { width: 1280, height: 720 },
+    }
+    chunks = []
+    socket.on('chunk', (c) => {
+        console.log(c)
+    })
+
+    async function setLocalStream() {
+      let stream
+      try {
+        stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
+
+
+
+
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start()
+        mediaRecorder.onstop = function(e) {
+            console.log("data available after MediaRecorder.stop() called.");
+            socket.emit("news", "save")
+            blob = new Blob(chunks, { 'type' : 'video/webm' });
+            localVideoComponent.src = window.URL.createObjectURL(blob);
+            localVideoComponent.play();
+            console.log("recorder stopped");
+        }
+
+        mediaRecorder.ondataavailable = function(e) {
+            console.log(e.data)
+            chunks.push(e.data)
+            socket.emit("chunks", e.data);
+        }
+
+   
+      } catch (error) {
+        console.error('Could not get user media', error)
+      }
+    
+    //   localStream = stream
+    //   localVideoComponent.srcObject = stream
+    }
+    
+    connectButton.addEventListener('click', () => {
+        setLocalStream()
+    })
+
+  
+  
+</script>

@@ -1,0 +1,66 @@
+
+<script src="/socket.io/socket.io.js"></script>
+
+<div id="video-chat-container" class="video-position" >
+    <video id="video" autoplay="autoplay" muted="muted"></video>
+</div>
+
+
+
+  <script>
+    const socket = io("http://localhost:3000");
+    socket.connect();
+    const videoComponent = document.getElementById('video')
+    chunks = []
+    socket.on("connect", () => {
+  console.log('connected')
+});
+
+socket.on('chunk', (c) => {
+        console.log(c)
+       chunks.push(c)
+       sourceWrite(c)
+    })
+    var mimeCodec = 'video/webm; codecs="vp8"';
+    if ('MediaSource' in window && MediaSource.isTypeSupported(mimeCodec)) {
+  var mediaSource = new MediaSource();
+  //console.log(mediaSource.readyState); // closed
+  videoComponent.src = URL.createObjectURL(mediaSource);
+  mediaSource.addEventListener('sourceopen', sourceOpen);
+} else {
+  console.error('Unsupported MIME type or codec: ', mimeCodec);
+}
+    // var videoBuilder = new Blob(chunks, {type : 'video/webm'});
+    // videoUrl = window.URL.createObjectURL(videoBuilder);
+    // videoComponent.src = videoUrl
+
+
+    function sourceOpen (_) {
+        mediaSource = this;
+        sourceBuffer = mediaSource.addSourceBuffer(mimeCodec);
+    }
+function sourceWrite(buf) {
+    console.log(this.readyState); // open
+    sourceBuffer.addEventListener('updateend', function (_) {
+      mediaSource.endOfStream();
+      video.play();
+      console.log(mediaSource.readyState); // ended
+    });
+    sourceBuffer.appendBuffer(buf);
+  };
+ 
+    
+
+
+    // async function setLocalStream() {
+
+    
+    // //   localStream = stream
+    // //   localVideoComponent.srcObject = stream
+    // }
+    
+
+
+  
+  
+</script>

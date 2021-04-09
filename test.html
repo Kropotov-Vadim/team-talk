@@ -1,0 +1,34 @@
+
+<button id="start">run</button>
+<div id="video-chat-container" class="video-position" style="display: none">
+    <video id="local-video" autoplay="autoplay" muted="muted"></video>
+    <video id="remote-video" autoplay="autoplay"></video>
+  </div>
+
+
+
+  <script>
+    const localVideoComponent = document.getElementById('local-video')
+    const connectButton = document.getElementById('start')
+    const mediaConstraints = {
+      audio: true,
+      video: { width: 1280, height: 720 },
+    }
+    
+    async function setLocalStream() {
+      let stream
+      try {
+        stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
+        console.log(stream)
+      } catch (error) {
+        console.error('Could not get user media', error)
+      }
+    
+      localStream = stream
+      localVideoComponent.srcObject = stream
+    }
+    
+    connectButton.addEventListener('click', () => {
+        setLocalStream()
+    })
+    </script>
